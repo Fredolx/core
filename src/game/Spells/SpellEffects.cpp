@@ -248,7 +248,7 @@ void Spell::EffectResurrectNew(SpellEffectIndex effIdx)
     Player* pTarget = ((Player*)unitTarget);
     pTarget->SendSysMessage("The light tried reaching your spirit, but it failed");
     auto caster = GetAffectiveCaster();
-    if (caster)
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)caster)->SendSysMessage("You may not resurrect those who were vanquished");
 }
 
