@@ -1950,19 +1950,6 @@ bool Player::TeleportTo(uint32 mapId, float x, float y, float z, float orientati
     }
     else
     {
-        // Revive player who died inside instance.
-        if ((GetDeathState() == DEAD) && (mapId > 1) && (GetMapId() != mapId))
-        {
-            if (Corpse* corpse = GetCorpse())
-            {
-                if (mapId == corpse->GetMapId())
-                {
-                    ResurrectPlayer(0.5f);
-                    SpawnCorpseBones();
-                }
-            }
-        }
-
         // check if we can enter before stopping combat / removing pet / totems / interrupting spells
         // Check enter rights before map getting to avoid creating instance copy for player
         // this check not dependent from map instance copy and same for all instance copies of selected map
@@ -5105,7 +5092,6 @@ void Player::RepopAtGraveyard()
             if (GetTransport())
             {
                 GetTransport()->RemovePassenger(this);
-                ResurrectPlayer(1.0f);
             }
             TeleportTo(pClosestGrave->map_id, pClosestGrave->x, pClosestGrave->y, pClosestGrave->z, orientation, TELE_TO_NOT_UNSUMMON_PET, std::move(recover));
         }
@@ -15546,11 +15532,6 @@ void Player::LoadCorpse()
     {
         if (Corpse* corpse = GetCorpse())
             ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStorage.LookupEntry<MapEntry>(corpse->GetMapId())->Instanceable());
-        else
-        {
-            //Prevent Dead Player login without corpse
-            ResurrectPlayer(0.5f);
-        }
     }
 }
 

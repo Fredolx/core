@@ -422,9 +422,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode(WorldPackets::Npc::SpiritHea
         return;
     }
 
-    GetPlayer()->InterruptSpellsWithChannelFlags(AURA_INTERRUPT_INTERACTING_CANCELS);
-    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_INTERACTING_CANCELS);
-    SendSpiritResurrect();
+    GetPlayer()->SendSysMessage("You are forever banished to the Shadowlands");
 }
 
 void WorldSession::SendSpiritResurrect()
