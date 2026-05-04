@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtbb-dev \
     git \
     cmake \
-    libmysqlclient-dev \
+    libmysql++-dev \
     openssl \
     libssl-dev \
     checkinstall \ 
