@@ -24,4 +24,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /data
 
-CMD ["/data/mangosd -c ./mangosd.conf"]
+CMD ["/data/mangosd", "-c", "./mangosd.conf"]
