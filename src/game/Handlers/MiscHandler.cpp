@@ -572,51 +572,14 @@ void WorldSession::HandleBugOpcode(WorldPackets::Misc::Bug const& packet)
 
 void WorldSession::HandleReclaimCorpseOpcode(WorldPackets::Misc::ReclaimCorpse const& /*packet*/)
 {
-    if (GetPlayer()->IsAlive())
-        return;
-
-    // body not released yet
-    if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        return;
-
-    Corpse* corpse = GetPlayer()->GetCorpse();
-
-    if (!corpse)
-        return;
-
-    // prevent resurrect before 30-sec delay after body release not finished
-    if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(nullptr))
-        return;
-
-    if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
-        return;
-
-    // Prevent exploit: die with hellfire during battleground preparation, and resurrect after the door.
-    if (BattleGround const* bg = GetPlayer()->GetBattleGround())
-        if (bg->GetStatus() != STATUS_IN_PROGRESS)
-            return;
-    // resurrect
-    GetPlayer()->ResurrectPlayer(GetPlayer()->InBattleGround() ? 1.0f : 0.5f);
-
-    // spawn bones
-    GetPlayer()->SpawnCorpseBones();
+    GetPlayer()->SendSysMessage("You are banished to the Shadowlands");
+    return;
 }
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPackets::Misc::ResurrectResponse const& packet)
 {
-    if (GetPlayer()->IsAlive())
-        return;
-
-    if (!packet.accept)
-    {
-        GetPlayer()->ClearResurrectRequestData(); // player denied rezz attempt
-        return;
-    }
-
-    if (!GetPlayer()->IsRessurectRequestedBy(packet.resurrectorGuid))
-        return;
-
-    GetPlayer()->ResurrectUsingRequestData();     // will call SpawnCorpseBones
+    GetPlayer()->SendSysMessage("You are banished to the Shadowlands");
+    return;
 }
 
 void WorldSession::HandleAreaTriggerOpcode(WorldPackets::Misc::AreaTrigger const& packet)

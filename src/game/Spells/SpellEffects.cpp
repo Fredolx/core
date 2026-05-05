@@ -250,16 +250,10 @@ void Spell::EffectResurrectNew(SpellEffectIndex effIdx)
     }
 
     Player* pTarget = ((Player*)unitTarget);
-
-    if (pTarget->IsRessurectRequested())      // already have one active request
-        return;
-
-    uint32 health = damage;
-    uint32 mana = m_spellInfo->EffectMiscValue[effIdx];
-    pTarget->SetResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetInstanceId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), health, mana);
-    SendResurrectRequest(pTarget, m_casterUnit && m_casterUnit->IsSpiritHealer());
-
-    AddExecuteLogInfo(effIdx, ExecuteLogInfo(unitTarget->GetObjectGuid()));
+    pTarget->SendSysMessage("The light tried reaching your spirit, but it failed");
+    auto caster = GetAffectiveCaster();
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)caster)->SendSysMessage("You may not resurrect those who were vanquished");
 }
 
 void Spell::EffectInstaKill(SpellEffectIndex /*effIdx*/)
@@ -5166,18 +5160,14 @@ void Spell::EffectResurrect(SpellEffectIndex effIdx)
     if (!unitTarget->IsInWorld())
         return;
 
-    Player* pTarget = ((Player*)unitTarget);
-
-    if (pTarget->IsRessurectRequested())      // already have one active request
-        return;
-
-    uint32 health = ditheru(pTarget->GetMaxHealth() * damage / 100);
-    uint32 mana   = ditheru(pTarget->GetMaxPower(POWER_MANA) * damage / 100);
-
-    pTarget->SetResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetInstanceId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), health, mana);
-    SendResurrectRequest(pTarget, m_casterUnit && m_casterUnit->IsSpiritHealer());
-
-    AddExecuteLogInfo(effIdx, ExecuteLogInfo(unitTarget->GetObjectGuid()));
+    auto caster = GetAffectiveCaster();
+    Player* deadPlayer = (Player*)unitTarget;
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* casterPlayer = (Player*)caster;
+        casterPlayer->SendSysMessage("You may not resurrect those who were vanquished");
+    }
+    deadPlayer->SendSysMessage("The light tried reaching your spirit, but it failed");
 }
 
 void Spell::EffectAddExtraAttacks(SpellEffectIndex effIdx)
@@ -5263,39 +5253,7 @@ void Spell::EffectQuestComplete(SpellEffectIndex effIdx)
 
 void Spell::EffectSelfResurrect(SpellEffectIndex effIdx)
 {
-    if (!unitTarget || unitTarget->IsAlive())
-        return;
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-    if (!unitTarget->IsInWorld())
-        return;
-
-    float health = 0;
-    float mana = 0;
-
-    // flat case
-    if (damage < 0)
-    {
-        health = -damage;
-        mana = m_spellInfo->EffectMiscValue[effIdx];
-    }
-    // percent case
-    else
-    {
-        health = damage / 100.0f * unitTarget->GetMaxHealth();
-        if (unitTarget->GetMaxPower(POWER_MANA) > 0)
-            mana = damage / 100.0f * unitTarget->GetMaxPower(POWER_MANA);
-    }
-
-    Player* plr = ((Player*)unitTarget);
-    plr->ResurrectPlayer(0.0f);
-
-    plr->SetHealth(ditheru(health));
-    plr->SetPower(POWER_MANA, ditheru(mana));
-    plr->SetPower(POWER_RAGE, 0);
-    plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY));
-
-    plr->SpawnCorpseBones();
+    return;
 }
 
 void Spell::EffectSkinning(SpellEffectIndex /*effIdx*/)
